@@ -11,7 +11,25 @@ namespace StockQuoteAlert.Services
     public class SmtpEmailService : IEmailService
     {
         private readonly SmtpConfig _config;
-        
+
+        /// <summary>
+        /// Checks for valid emails.
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        public static bool IsValidEmail(string email)
+        {
+            try
+            {
+                var addr = new MailAddress(email);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="SmtpEmailService"/> class.
         /// </summary>
@@ -70,9 +88,20 @@ namespace StockQuoteAlert.Services
                 Credentials = new NetworkCredential(_config.Username, _config.Password),
                 EnableSsl = _config.EnableSsl ?? true
             };
+            if (!IsValidEmail(_config.From))
+            {
+                Console.WriteLine($"Invalid 'From' email address in smtpsettings.json: {_config.From}");
+                return;
+            }
 
             foreach (var recipient in recipients)
             {
+                if (!IsValidEmail(recipient))
+                {
+                    Console.WriteLine($"Invalid recipient email address: {recipient}");
+                    continue;
+                }
+
                 var mail = new MailMessage(_config.From, recipient, subject, body);
                 try
                 {
