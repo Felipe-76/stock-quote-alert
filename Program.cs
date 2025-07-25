@@ -16,31 +16,32 @@ namespace StockQuoteAlert
                 Console.WriteLine(parseResult.ErrorMessage);
                 return;
             }
-
+            
+            // Parsed args
             string ticker = parseResult.Ticker ?? "";
             decimal sellPrice = parseResult.SellPrice;
             decimal buyPrice = parseResult.BuyPrice;
 
-
-            Console.WriteLine($"ticker: {ticker}");
-            Console.WriteLine($"sellPrice: {sellPrice}");
-            Console.WriteLine($"buyPrice: {buyPrice}");
-
-            // TODO: 2. Send emails with SMTP.
-            // TODO: 3. Read SMTP server credentials from config file.
-            // TODO: 4. Read recipients from config file.
-
+            // Initializing Services
             var stockQuoteClient = YahooStockQuoteClient.Instance;
             var stockMonitorService = new StockMonitorService(stockQuoteClient);
+            var recipientsService = new CsvRecipientsService(csvFilePath:"email_recipients.csv", separator:",");
+
+            List<string> recipients = recipientsService.GetRecipients();
+            Console.WriteLine(string.Join(", ", recipients));
+
+            while (true)
+            {
+                (StockAlertType alertType, StockPriceResult priceResult) = await stockMonitorService.CheckAlertAsync(ticker, sellPrice, buyPrice);
+                Console.WriteLine(alertType);
+
+                // TODO: 2. Read SMTP server credentials from config file.
+                // TODO: 3. Send emails with SMTP.
+
+
+                await Task.Delay(2 * 1000);    
+            }
             
-            (StockAlertType alertType, StockPriceResult priceResult) = await stockMonitorService.CheckAlertAsync(ticker, sellPrice, buyPrice);
-            
-            Console.WriteLine(alertType);
-
-
-
-            await Task.Delay(2 * 1000);
-
         }
     }
 }
