@@ -31,15 +31,13 @@ namespace StockQuoteAlert
             // TODO: 4. Read recipients from config file.
 
             var stockQuoteClient = YahooStockQuoteClient.Instance;
-            StockPriceResult priceResult = await stockQuoteClient.GetCurrentPriceAsync(ticker);
-            if (priceResult.Success)
-                {
-                    Console.WriteLine($"Current price for {ticker}: {priceResult.Price}");
-                }
-            else
-            {
-                Console.WriteLine($"Failed to fetch price for {ticker}: {priceResult.ErrorMessage}");
-            }
+            var stockMonitorService = new StockMonitorService(stockQuoteClient);
+            
+            (StockAlertType alertType, StockPriceResult priceResult) = await stockMonitorService.CheckAlertAsync(ticker, sellPrice, buyPrice);
+            
+            Console.WriteLine(alertType);
+
+
 
             await Task.Delay(2 * 1000);
 
