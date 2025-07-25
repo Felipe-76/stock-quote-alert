@@ -1,6 +1,5 @@
 using StockQuoteAlert.DataModels;
 
-
 namespace StockQuoteAlert.Services
 {
     public static class ArgsParser

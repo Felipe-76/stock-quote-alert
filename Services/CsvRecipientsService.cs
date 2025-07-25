@@ -1,6 +1,3 @@
-using StockQuoteAlert.DataModels;
-using StockQuoteAlert.Services;
-
 namespace StockQuoteAlert.Services
 {
     /// <summary>
