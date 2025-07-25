@@ -10,6 +10,18 @@ namespace StockQuoteAlert
         /// Interval in minutes for each stock price checking and email sending.
         /// </summary>
         private const int AlertIntervalMins = 10;
+        /// <summary>
+        /// Filepath of smtp json settings.
+        /// </summary>
+        private const string SmtpSettingsFilePath = "smtpsettings.json";
+        /// <summary>
+        /// Filepath of recipients csv.
+        /// </summary>
+        private const string RecipientsCsvFilePath = "email_recipients.csv";
+        /// <summary>
+        /// Recipients csv columns separator.
+        /// </summary>
+        private const string CsvSeparator = ",";
         static async Task Main(string[] args)
         {
 
@@ -29,9 +41,10 @@ namespace StockQuoteAlert
             // Initializing Services
             var stockQuoteClient = YahooStockQuoteClient.Instance;
             var stockMonitorService = new StockMonitorService(stockQuoteClient);
-            var recipientsService = new CsvRecipientsService(csvFilePath: "email_recipients.csv", separator: ",");
-            var mailService = new SmtpEmailService(configFilePath: "smtpsettings_test.json");
+            var mailService = new SmtpEmailService(configFilePath: SmtpSettingsFilePath);
+            var recipientsService = new CsvRecipientsService(csvFilePath: RecipientsCsvFilePath, separator: CsvSeparator);
 
+            // Extracting recipients from recipients service
             List<string> recipients = recipientsService.GetRecipients();
 
             while (true)

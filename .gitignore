@@ -1,6 +1,7 @@
 bin
 obj
 .zshrc
+smtpsettings_test.json
 
 
 ## Ignore Visual Studio temporary files, build results, and

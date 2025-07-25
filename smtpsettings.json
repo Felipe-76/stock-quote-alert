@@ -1,0 +1,10 @@
+{
+  "Smtp": {
+    "Host": "Host",
+    "Port": 587,
+    "EnableSsl": true,
+    "Username": "Username",
+    "Password": "Password",
+    "From": "From"
+  }
+} 
