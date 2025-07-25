@@ -6,6 +6,10 @@ namespace StockQuoteAlert
 {
     class Program
     {
+        /// <summary>
+        /// Interval in minutes for each stock price checking and email sending.
+        /// </summary>
+        private const int AlertIntervalMins = 10;
         static async Task Main(string[] args)
         {
 
@@ -16,7 +20,7 @@ namespace StockQuoteAlert
                 Console.WriteLine(parseResult.ErrorMessage);
                 return;
             }
-            
+
             // Parsed args
             string ticker = parseResult.Ticker ?? "";
             decimal sellPrice = parseResult.SellPrice;
@@ -25,23 +29,26 @@ namespace StockQuoteAlert
             // Initializing Services
             var stockQuoteClient = YahooStockQuoteClient.Instance;
             var stockMonitorService = new StockMonitorService(stockQuoteClient);
-            var recipientsService = new CsvRecipientsService(csvFilePath:"email_recipients.csv", separator:",");
+            var recipientsService = new CsvRecipientsService(csvFilePath: "email_recipients.csv", separator: ",");
+            var mailService = new SmtpEmailService(configFilePath: "smtpsettings_test.json");
 
             List<string> recipients = recipientsService.GetRecipients();
-            Console.WriteLine(string.Join(", ", recipients));
 
             while (true)
             {
                 (StockAlertType alertType, StockPriceResult priceResult) = await stockMonitorService.CheckAlertAsync(ticker, sellPrice, buyPrice);
-                Console.WriteLine(alertType);
 
-                // TODO: 2. Read SMTP server credentials from config file.
-                // TODO: 3. Send emails with SMTP.
+                if (alertType != StockAlertType.None)
+                {
+                    string subject = $"Stock Alert: {ticker} - {alertType} Price Reached!";
+                    string body = $"The stock {ticker} has reached a {alertType} price of {priceResult.Price}. " +
+                                $"Sell price: {sellPrice}, Buy price: {buyPrice}.";
 
+                    await mailService.SendAlertAsync(recipients, subject, body);
+                }
 
-                await Task.Delay(2 * 1000);    
+                await Task.Delay(AlertIntervalMins * 60 * 1000);
             }
-            
         }
     }
 }
